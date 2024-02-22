@@ -23,21 +23,36 @@ def print_msg(data: List[Message, ]):
     определяем тип и забираем.
     типы: текст, штмл, аттач.
     - вложенность, как определить?
-
     """
 
     # https://habr.com/ru/articles/17531/
     for i in data:
+        write_to_f(i.get('Return-path'))
+        write_to_f(i.get('Date'))
+        # write_to_f(i.get('Subject'))
+
         for part in i.walk():
             if part.get_content_type():
                 content_type = part.get_content_type()
-                write_to_f('--------------' + content_type + '--------------')
+                write_to_f('content_type_content_type ---' +
+                           content_type + '--- content_type_content_type')
 
-                if content_type == 'text/plain':
-                    write_to_f(part.get_payload())
-                elif content_type == 'text/html':
-                    write_to_f(part.get_payload())
-            break
+                if content_type == 'text/plain' or content_type == 'text/html':
+                    if part._headers[1][1] == 'base64':
+                        write_to_f('base64 ' * 10)
+                        content = part.get_payload(
+                            decode=True).decode('utf-8')
+                        # html обработывать
+                        write_to_f(pprint.pformat(content))
+                        write_to_f('base64 ' * 10)
+                    else:
+                        write_to_f(part.get_payload())
+                        try:
+                            write_to_f(part.get_payload(decode=True))
+                        except:
+                            pass
+        write_to_f(' END ' * 10)
+
 
 # Подключение к серверу IMAP
 mail = imaplib.IMAP4_SSL(HOST)
@@ -49,11 +64,17 @@ status, num = mail.search(None, 'ALL')
 all_messages = []
 # перебираем сообщения по номерам
 nums = num[0].split()
-for _ in nums[:3]:
-    status, data = mail.fetch(_, '(RFC822)')
-    msg_body = data[0][1].decode('utf-8')
-    email_message = email.message_from_string(msg_body)
-    all_messages.append(email_message)
+for _ in nums[20:]:
+    try:
+        write_to_f(str(_) * 50)
+        status, data = mail.fetch(_, '(RFC822)')
 
+        msg_body = data[0][1].decode('utf-8')
 
+        email_message = email.message_from_string(msg_body)
+        all_messages.append(email_message)
+    except:
+        pass
+
+print(all_messages)
 print_msg(all_messages)
