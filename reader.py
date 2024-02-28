@@ -57,12 +57,14 @@ def except_message_read(msg):
             else:
                 write_to_f(part.get_payload())
 
-        elif content_type == 'text/html':
+        elif content_type == 'text/html':  # Пока без html
+            continue
+            
             if content_encoding == 'base64':
+                continue
+                # msg_text = bs64_decode(part.get_payload())
 
-                msg_text = bs64_decode(part.get_payload())
-
-                message.attach(MIMEText(msg_text, 'plain'))
+                # message.attach(MIMEText(msg_text, 'plain'))
             else:
                 write_to_f(part.get_payload())
 
