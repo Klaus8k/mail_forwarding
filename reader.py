@@ -39,26 +39,29 @@ def bs64_decode(data: str):
     return base64.b64decode(data).decode('utf-8')
 
 
-def sender_msg(message: dict):
+def sender_msg(message):
     smtp = smtplib.SMTP(host=HOST, port=587)
     smtp.ehlo()
     smtp.starttls()
     smtp.ehlo()
     smtp.login(SOURCE_ADDR, PSWD)
-    msg = MIMEMultipart()
-    msg['From'] = SOURCE_ADDR
-    msg['To'] = 'tipkor@mail.ru'
+    msg = message
+    # msg = MIMEMultipart()
+    # msg['From'] = SOURCE_ADDR
+    # msg['To'] = 'tipkor@mail.ru'
     
-    f_name = '1.pdf'
-    msg.attach(MIMEApplication(message['file'], Name=f_name))
-    msg['Content-Disposition'] = 'attachment; filename="%s"' % f_name
-    smtp.send_message(msg=msg, from_addr=SOURCE_ADDR, to_addrs=msg['To'])
+    # f_name = '1.pdf'
+    
+    # msg.attach(MIMEApplication(message['file'], Name=f_name))
+    
+    # msg['Content-Disposition'] = 'attachment; filename="%s"' % f_name
+    smtp.send_message(msg=msg, from_addr=SOURCE_ADDR, to_addrs='tipkor@mail.ru')
     
     smtp.close()
 
 
 def print_msg(data: List[Message, ]):
-
+    sender_msg(message=data[0])
 
     for msg in data:
 
@@ -117,7 +120,8 @@ def print_msg(data: List[Message, ]):
                         f'!!!!!!!!!!!!!!! content type Который не обработан: {content_type}')
 
         write_to_f(' END ' * 10)
-        sender_msg(message=message)
+        
+        # sender_msg(message=message)
 
 
 # перебираем сообщения по номерам
@@ -126,9 +130,10 @@ for _ in nums[:1]:
 
     status, data = mail.fetch(_, '(RFC822)')
 
-    msg_body = data[0][1].decode('utf-8', errors='replace')
+    msg_body = data[0][1]
 
-    email_message = email.message_from_string(msg_body)
-    all_messages.append(email_message)
+    email_message = email.message_from_bytes(msg_body)
+    sender_msg(message=email_message)
+    # all_messages.append(email_message)
 
-print_msg(all_messages)
+# print_msg(all_messages)
