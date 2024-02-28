@@ -2,14 +2,17 @@ import json
 import imaplib
 import email
 import smtplib
+from reader import except_message_read
+
 
 const_dict = json.load(open("const.json", "r"))
 SOURCE_ADDR = const_dict["email"]
 PSWD = const_dict["pass"]
 HOST = "imap.spaceweb.ru"
 
-FORWARD_ADDRESS = 'tipkor@mail.ru'
+FORWARD_ADDRESS = const_dict['FORWARD_ADDRESS']
 
+EXEPT_ADDRESS = const_dict['EXEPT_ADDRESS']
 
 # Подключение к серверу IMAP
 mail = imaplib.IMAP4_SSL(HOST)
@@ -42,6 +45,12 @@ for _ in nums:
     status, data = mail.fetch(_, '(RFC822)')
     msg_body = data[0][1]
     email_message = email.message_from_bytes(msg_body)
+    
+    src_message = email_message
+    if src_message['From'] in EXEPT_ADDRESS:
+        email_message = except_message_read(email_message)
+        email_message['From'] = src_message['From'].split('@')[1]
+        email_message['Subject'] = src_message['Subject']
 
     msg_to_send.append(email_message)
     sender_msg(all_msg=msg_to_send)
