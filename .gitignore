@@ -1,2 +1,4 @@
 const.json
 /mail_venv
+/__pycache__
+log
