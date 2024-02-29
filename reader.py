@@ -7,7 +7,7 @@ import base64
 
 
 def write_to_f(data):
-    with open('1.txt', 'a', encoding='utf-8') as f:
+    with open('log', 'a', encoding='utf-8') as f:
         f.write(data + '\n')
 
 
